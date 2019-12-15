@@ -44,6 +44,32 @@ module.exports = class IntCodeComputer {
                 case 4:
                     console.log(`Out: ${this.getParameter(this.parameterModes.first)}`);
                     break;
+                case 5:
+                    first = this.getParameter(this.parameterModes.first);
+                    second = this.getParameter(this.parameterModes.second);
+
+                    if (first !== 0) {
+                        this.ip = second;
+                    }
+                    break;
+                case 6:
+                    first = this.getParameter(this.parameterModes.first);
+                    second = this.getParameter(this.parameterModes.second);
+
+                    if (first === 0) {
+                        this.ip = second;
+                    }
+                    break;
+                case 7:
+                    first = this.getParameter(this.parameterModes.first);
+                    second = this.getParameter(this.parameterModes.second);
+                    this.setOpcode(this.readOpcode(), first < second ? 1 : 0);
+                    break;
+                case 8:
+                    first = this.getParameter(this.parameterModes.first);
+                    second = this.getParameter(this.parameterModes.second);
+                    this.setOpcode(this.readOpcode(), first === second ? 1 : 0);
+                    break;
                 case 99:
                     done = true;
                     break;
