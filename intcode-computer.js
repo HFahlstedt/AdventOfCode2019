@@ -8,6 +8,7 @@ class Instruction {
 module.exports = class IntCodeComputer {
     constructor() {
         this.opcodes = [];
+        this.inputQueue = [];
         this.ip = 0;
         this.parameterModes = { first: 0, second: 0, third: 0 };
         this.instruction = 0;
@@ -32,11 +33,17 @@ module.exports = class IntCodeComputer {
                     this.setOpcode(this.readOpcode(), first + second);
                     break;            
                 case 2:
-                        first = this.getParameter(this.parameterModes.first);
-                        second = this.getParameter(this.parameterModes.second);
+                    first = this.getParameter(this.parameterModes.first);
+                    second = this.getParameter(this.parameterModes.second);
 
-                        this.setOpcode(this.readOpcode(), first * second);
-                    break;            
+                    this.setOpcode(this.readOpcode(), first * second);
+                    break;
+                case 3: 
+                    this.setOpcode(this.readOpcode(), this.readInput());
+                    break;
+                case 4:
+                    console.log(`Out: ${this.getParameter(this.parameterModes.first)}`);
+                    break;
                 case 99:
                     done = true;
                     break;
@@ -49,7 +56,11 @@ module.exports = class IntCodeComputer {
     readInstruction() {
         const opcode = this.readOpcode();
         this.instruction = opcode % 100;
-        this.parameterModes = { first: Math.floor(opcode/100), second: Math.floor(opcode/1000), third: Math.floor(opcode/10000) };
+        this.parameterModes = { 
+            first: Math.floor((opcode % 1000)/100), 
+            second: Math.floor((opcode % 10000)/1000), 
+            third: Math.floor(opcode/10000) 
+        };
     }
 
     getParameter(mode) {
@@ -63,4 +74,8 @@ module.exports = class IntCodeComputer {
     }
 
     readOpcode = () => this.opcodes[this.ip++];
+
+    readInput() {
+        return this.inputQueue.pop();
+    }
 }
