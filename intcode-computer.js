@@ -12,13 +12,15 @@ module.exports = class IntCodeComputer {
         this.ip = 0;
         this.parameterModes = { first: 0, second: 0, third: 0 };
         this.instruction = 0;
+        this.out = undefined;
     }
 
     loadProgram(programString) {
+        this.reset();
         this.opcodes = programString.split(',').map(o => parseInt(o, 10));
     }
 
-    run() {
+    run(verbose = false) {
         let done = false;
 
         while (!done) {
@@ -42,7 +44,8 @@ module.exports = class IntCodeComputer {
                     this.setOpcode(this.readOpcode(), this.readInput());
                     break;
                 case 4:
-                    console.log(`Out: ${this.getParameter(this.parameterModes.first)}`);
+                    this.out = this.getParameter(this.parameterModes.first);
+                    console.log(`Out: ${this.out}`);
                     break;
                 case 5:
                     first = this.getParameter(this.parameterModes.first);
@@ -76,6 +79,10 @@ module.exports = class IntCodeComputer {
                     default:
                     break;
             }
+
+            if (verbose) {
+                console.log(this.opcodes.join(','));
+            }
         }
     }
 
@@ -103,5 +110,14 @@ module.exports = class IntCodeComputer {
 
     readInput() {
         return this.inputQueue.pop();
+    }
+
+    reset() {
+        this.opcodes = [];
+        this.inputQueue = [];
+        this.ip = 0;
+        this.parameterModes = { first: 0, second: 0, third: 0 };
+        this.instruction = 0;
+        this.out = undefined;
     }
 }
