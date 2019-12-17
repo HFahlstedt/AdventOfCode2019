@@ -13,6 +13,8 @@ module.exports = class IntCodeComputer {
         this.parameterModes = { first: 0, second: 0, third: 0 };
         this.instruction = 0;
         this.out = undefined;
+        this.haltOnOutput = false;
+        this.executing = true;
     }
 
     loadProgram(programString) {
@@ -46,6 +48,9 @@ module.exports = class IntCodeComputer {
                 case 4:
                     this.out = this.getParameter(this.parameterModes.first);
                     console.log(`Out: ${this.out}`);
+                    if (this.haltOnOutput) {
+                        done = true;
+                    }
                     break;
                 case 5:
                     first = this.getParameter(this.parameterModes.first);
@@ -75,6 +80,7 @@ module.exports = class IntCodeComputer {
                     break;
                 case 99:
                     done = true;
+                    this.executing = false;
                     break;
                     default:
                     break;
@@ -109,6 +115,10 @@ module.exports = class IntCodeComputer {
     readOpcode = () => this.opcodes[this.ip++];
 
     readInput() {
+        if (this.inputQueue.length < 1) {
+            return this.out;
+        }
+
         return this.inputQueue.pop();
     }
 
