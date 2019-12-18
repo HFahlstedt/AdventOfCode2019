@@ -15,6 +15,7 @@ module.exports = class IntCodeComputer {
         this.out = undefined;
         this.haltOnOutput = false;
         this.executing = true;
+        this.relativeBase = 0;
     }
 
     loadProgram(programString) {
@@ -34,16 +35,16 @@ module.exports = class IntCodeComputer {
                     first = this.getParameter(this.parameterModes.first);
                     second = this.getParameter(this.parameterModes.second);
 
-                    this.setOpcode(this.readOpcode(), first + second);
+                    this.setOpcode(this.parameterModes.third, first + second);
                     break;            
                 case 2:
                     first = this.getParameter(this.parameterModes.first);
                     second = this.getParameter(this.parameterModes.second);
 
-                    this.setOpcode(this.readOpcode(), first * second);
+                    this.setOpcode(this.parameterModes.third, first * second);
                     break;
                 case 3: 
-                    this.setOpcode(this.readOpcode(), this.readInput());
+                    this.setOpcode(this.parameterModes.first, this.readInput());
                     break;
                 case 4:
                     this.out = this.getParameter(this.parameterModes.first);
@@ -71,12 +72,16 @@ module.exports = class IntCodeComputer {
                 case 7:
                     first = this.getParameter(this.parameterModes.first);
                     second = this.getParameter(this.parameterModes.second);
-                    this.setOpcode(this.readOpcode(), first < second ? 1 : 0);
+                    this.setOpcode(this.parameterModes.third, first < second ? 1 : 0);
                     break;
                 case 8:
                     first = this.getParameter(this.parameterModes.first);
                     second = this.getParameter(this.parameterModes.second);
-                    this.setOpcode(this.readOpcode(), first === second ? 1 : 0);
+                    this.setOpcode(this.parameterModes.third, first === second ? 1 : 0);
+                    break;
+                case 9:
+                    first = this.getParameter(this.parameterModes.first);
+                    this.relativeBase += first;
                     break;
                 case 99:
                     done = true;
@@ -105,10 +110,18 @@ module.exports = class IntCodeComputer {
     getParameter(mode) {
         const opcode = this.readOpcode();
         
-        return mode === 1 ? opcode : this.opcodes[opcode];
+        switch (mode) {
+            case 0: 
+                return this.opcodes[opcode] || 0;
+            case 1: 
+                return opcode;
+            case 2:
+                return this.opcodes[this.relativeBase + opcode] || 0;
+        }
     }
 
-    setOpcode(address, value) {
+    setOpcode(mode, value) {
+        const address = this.readOpcode() + (mode === 2 ? this.relativeBase : 0);
         this.opcodes[address] = value;
     }
 
